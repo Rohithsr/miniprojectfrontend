@@ -2,14 +2,15 @@
     <div class="task-list">
         <div v-for="task in tasks" :key="task.id" class="task">
             <div class="task-checkbox">
-                <input type="checkbox" v-model="task.completed" @change="updateTaskStatus(task)" />
+                <input type="checkbox" v-model="task.completed" @change="updateTaskStatus(task)" :id="'checkbox-' + task.id" />
+                <label :for="'checkbox-' + task.id"></label>
             </div>
             <div class="task-details">
                 <span :class="{ 'completed-task': task.completed }">{{ task.title }}</span>
             </div>
             <div class="task-actions">
                 <button @click="updateTask(task)" class="btn-update">Update</button>
-                <button @click="deleteTask(task.id)" class="btn-delete">Delete</button>
+                <button @click="confirmDelete(task.id)" class="btn-delete">Delete</button>
             </div>
         </div>
     </div>
@@ -42,14 +43,16 @@ export default {
                     console.error('Error updating task status:', error);
                 });
         },
-        deleteTask(id) {
-            axios.delete(`http://localhost:3000/api/tasks/${id}`)
-                .then(() => {
-                    this.$emit('taskDeleted');
-                })
-                .catch(error => {
-                    console.error('Error deleting task:', error);
-                });
+        confirmDelete(id) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                axios.delete(`http://localhost:3000/api/tasks/${id}`)
+                    .then(() => {
+                        this.$emit('taskDeleted');
+                    })
+                    .catch(error => {
+                        console.error('Error deleting task:', error);
+                    });
+            }
         }
     }
 };
@@ -73,6 +76,14 @@ export default {
 
 .task-checkbox {
     margin-right: 10px;
+}
+
+.task-checkbox input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.task-checkbox label {
+    cursor: pointer;
 }
 
 .task-details {
